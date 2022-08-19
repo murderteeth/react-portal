@@ -1,29 +1,34 @@
 import React, { useMemo, useState } from 'react'
 import {RiDoorOpenFill, RiDoorClosedFill} from 'react-icons/ri'
 
+const rRange = (min: number, max: number) => Math.floor(
+  Math.random() * (Math.floor(max) - Math.ceil(min) + 1) + Math.ceil(min))
+
 export default function App() {
   const PARTICLE_COUNT = 200
-  const rRange = (min: number, max: number) => Math.floor(Math.random() * (Math.floor(max) - Math.ceil(min) + 1) + Math.ceil(min))
   const [hover, setHover] = useState(false)
   const [press, setPress] = useState(false)
   const [clicked, setClicked] = useState(false)
-  const palletStride = 3
-  const pallet = ['#78350f', '#f59e0b', '#fcd34d', '#831843', '#ec4899', '#f9a8d4', '#1e3a8a', '#3b82f6', '#93c5fd']
-  const palletSlots = pallet.length / palletStride
+
+  const pallet = useMemo(() => [
+    '#78350f', '#f59e0b', '#fcd34d', 
+    '#831843', '#ec4899', '#f9a8d4', 
+    '#1e3a8a', '#3b82f6', '#93c5fd'
+  ], [])
 
   const particles = useMemo(() => {
-    // color: pallet[Math.floor(Math.random() * pallet.length)],
-    return Array(PARTICLE_COUNT).fill({}).map((o, i) => { 
-      return ({
-      time: `${1 + 3 * Math.random()}s`,
-      size: `${rRange(4, 12)}px`,
-      borderRadius: Math.random() > .5 ? '50%' : '0%',
-      color: pallet[Math.floor(palletStride * palletSlots * i / PARTICLE_COUNT) + Math.floor(2 * Math.random())],
-      rotate: `${rRange(0, 90)}deg`,
+    return Array(PARTICLE_COUNT).fill({}).map((_, i) => ({
+      time: 1 + 3 * Math.random(),
+      size: rRange(4, 12),
+      borderRadius: Math.random() > .5 ? 50 : 0,
+      color: pallet[
+        Math.floor(pallet.length * i / PARTICLE_COUNT)
+        + Math.floor(2 * Math.random())],
+      rotate: rRange(0, 90),
       scaleEnd: (100 - rRange(0, 90)) / 100,
-      animationDelay: `-${rRange(0, 2000)}ms`
-    })})
-  }, [])
+      animationDelay: -rRange(0, 2000)
+    }))
+  }, [pallet])
 
   return <div className={'w-full h-full flex flex-col items-center justify-center gap-16'}>
     <h1 className={`
@@ -53,14 +58,14 @@ export default function App() {
           style={{transform: `rotate(${i * 360 / PARTICLE_COUNT}deg) translateX(60px)`}}>
           <div className={`portal-particle`} 
             style={{
-              ['--time' as any]: particle.time,
-              width: particle.size,
-              height: particle.size,
-              borderRadius: particle.borderRadius,
+              ['--time' as any]: `${particle.time}s`,
+              width: `${particle.size}px`,
+              height: `${particle.size}px`,
+              borderRadius: `${particle.borderRadius}%`,
               backgroundColor: particle.color,
-              ['--rotate' as any]: particle.rotate,
+              ['--rotate' as any]: `${particle.rotate}deg`,
               ['--scale-end' as any]: clicked ? 4 : hover || press ? (press ? .35 : particle.scaleEnd) : particle.scaleEnd,
-              animationDelay:  particle.animationDelay
+              animationDelay:  `${particle.animationDelay}ms`
             }} />
         </div>)}
       </div>
